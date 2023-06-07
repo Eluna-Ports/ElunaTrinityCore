@@ -1,0 +1,56 @@
+name: automerge
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron:  '0 0 * * *'
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: 'recursive'
+        fetch-depth: 0
+    - name: Merge TC
+      run: |
+        git status
+        git config user.email "niam5+ci@post.com" && git config user.name "Niam5"
+        git remote add Trinity https://github.com/TrinityCore/TrinityCore.git
+        git fetch --all
+        git rebase Trinity/master
+        git status
+    - name: Set reusable strings
+      id: strings
+      shell: bash
+      run: |
+        echo "build-output-dir=${{ github.workspace }}/bin" >> "$GITHUB_OUTPUT"
+    - name: Dependencies
+      run: |
+        sudo apt-get update && sudo apt-get install -yq libboost-all-dev g++-11
+        sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-11 100 --slave /usr/bin/g++ g++ /usr/bin/g++-11
+    - name: Setup
+      env:
+        CMAKE_BUILD_TYPE: Debug
+      run: >
+        cmake -S ${{ github.workspace }} -B ${{ steps.strings.outputs.build-output-dir }}
+        -DWITH_WARNINGS=1 -DWITH_COREDEBUG=0 -DUSE_COREPCH=1 -DUSE_SCRIPTPCH=1 -DTOOLS=1 -DSCRIPTS=dynamic -DSERVERS=1 -DNOJEM=0
+        -DCMAKE_C_FLAGS_DEBUG="-DNDEBUG" -DCMAKE_CXX_FLAGS_DEBUG="-DNDEBUG"
+        -DCMAKE_INSTALL_PREFIX=check_install -DBUILD_TESTING=1
+    - name: Build
+      run: |
+        cd bin
+        make -j 4 -k && make install
+    - name: Unit tests
+      run: |
+        cd bin
+        make test
+    - name: Check executables
+      run: |
+        cd ${{ github.workspace }}/check_install/bin
+        ./bnetserver --version
+        ./worldserver --version
+    - name: Push changes
+      run: |
+          git push -f
