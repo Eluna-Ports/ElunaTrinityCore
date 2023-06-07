@@ -66,6 +66,9 @@
 #include "World.h"
 #include <boost/circular_buffer.hpp>
 #include <sstream>
+#ifdef ELUNA
+#include "LuaEngine.h"
+#endif
 
 class LoginQueryHolder : public CharacterDatabaseQueryHolder
 {
