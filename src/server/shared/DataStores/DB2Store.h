@@ -22,6 +22,7 @@
 #include "Errors.h"
 #include "DBStorageIterator.h"
 #include <vector>
+#include <cstring>
 
 class ByteBuffer;
 struct DB2LoadInfo;
@@ -85,6 +86,27 @@ public:
 
     iterator begin() const { return iterator(reinterpret_cast<T const* const*>(_indexTable), _indexTableSize, _minId); }
     iterator end() const { return iterator(reinterpret_cast<T const* const*>(_indexTable), _indexTableSize, _indexTableSize); }
+/*
+#ifdef ELUNA
+    void SetEntry(uint32 id, T* t)
+    {
+        if (id >= _indexTableSize)
+        {
+            // Resize
+            typedef char* ptr;
+            size_t newSize = id + 1;
+            ptr* newArr = new ptr[newSize];
+            memset(newArr, 0, newSize * sizeof(ptr));
+            memcpy(newArr, _indexTable.AsChar, _indexTableSize * sizeof(ptr));
+            delete[] reinterpret_cast<char*>(_indexTable.AsT);
+            _indexTable.AsChar = newArr;
+            _indexTableSize = newSize;
+        }
+
+        delete _indexTable.AsT[id];
+        _indexTable.AsT[id] = t;
+    }
+#endif*/
 };
 
 #endif
