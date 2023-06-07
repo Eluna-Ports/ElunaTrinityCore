@@ -157,6 +157,8 @@ class TC_DATABASE_API Field
             return buf;
         }
 
+        DatabaseFieldTypes GetType() { return _meta->Type; }
+   
     private:
         char const* _value;             // Actual data in memory
         uint32 _length;                 // Length
