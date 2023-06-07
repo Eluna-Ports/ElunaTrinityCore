@@ -39,6 +39,9 @@
 #include <variant>
 #include <vector>
 
+#ifdef ELUNA
+class Eluna;
+#endif
 class Player;
 class WorldPacket;
 class WorldSession;
@@ -793,6 +796,11 @@ class TC_GAME_API World
         {
             return _gameRules;
         }
+
+#ifdef ELUNA
+        Eluna* GetEluna() const { return eluna; }
+        Eluna* eluna;
+#endif
 
     protected:
         void _UpdateGameTime();

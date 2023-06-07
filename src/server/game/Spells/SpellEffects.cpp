@@ -86,6 +86,9 @@
 #include "World.h"
 #include "WorldPacket.h"
 #include "WorldSession.h"
+#ifdef ELUNA
+#include "LuaEngine.h"
+#endif
 
 NonDefaultConstructible<SpellEffectHandlerFn> SpellEffectHandlers[TOTAL_SPELL_EFFECTS] =
 {
@@ -585,6 +588,17 @@ void Spell::EffectDummy()
             return;
         }
     }
+#ifdef ELUNA
+    if (Eluna* e = m_caster->GetEluna())
+    {
+        if (gameObjTarget)
+            e->OnDummyEffect(m_caster, m_spellInfo->Id, effectInfo->EffectIndex, gameObjTarget);
+        //else if (unitTarget && unitTarget->GetTypeId() == TYPEID_UNIT)
+            //e->OnDummyEffect(m_caster, m_spellInfo->Id, effectInfo->EffectIndex, unitTarget->ToCreature());
+        else if (itemTarget)
+            e->OnDummyEffect(m_caster, m_spellInfo->Id, effectInfo->EffectIndex, itemTarget);
+    }
+#endif
 }
 
 void Spell::EffectTriggerSpell()
