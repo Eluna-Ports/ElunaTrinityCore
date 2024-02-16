@@ -55,6 +55,9 @@
 #include "ZoneScript.h"
 #include <G3D/g3dmath.h>
 #include <sstream>
+#ifdef ELUNA
+#include "LuaEngine.h"
+#endif
 
 CreatureMovementData::CreatureMovementData() : HoverInitiallyEnabled(false), Chase(CreatureChaseMovementType::Run),
 Random(CreatureRandomMovementType::Walk), InteractionPauseTimer(sWorld->getIntConfig(CONFIG_CREATURE_STOP_FOR_PLAYER)) { }
@@ -352,6 +355,11 @@ void Creature::AddToWorld()
 
         if (GetZoneScript())
             GetZoneScript()->OnCreatureCreate(this);
+
+#ifndef ELUNA
+        if (Eluna* e = GetEluna())
+            e->OnAddToWorld(this);
+#endif
     }
 }
 
@@ -359,6 +367,10 @@ void Creature::RemoveFromWorld()
 {
     if (IsInWorld())
     {
+#ifndef ELUNA
+        if (Eluna* e = GetEluna())
+            e->OnRemoveFromWorld(this);
+#endif
         if (GetZoneScript())
             GetZoneScript()->OnCreatureRemove(this);
 
