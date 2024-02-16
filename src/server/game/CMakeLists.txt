@@ -25,6 +25,7 @@ else()
     )
 endif()
 
+# Exclude files in the LuaEngine directory for Mangos, CMangos and VMangos
 CollectSourceFiles(
   ${CMAKE_CURRENT_SOURCE_DIR}
   PRIVATE_SOURCES
@@ -38,13 +39,14 @@ endif()
 
 GroupSources(${CMAKE_CURRENT_SOURCE_DIR})
 
+# Exclude files in the LuaEngine directory for Mangos, CMangos and VMangos
 CollectIncludeDirectories(
   ${CMAKE_CURRENT_SOURCE_DIR}
   PUBLIC_INCLUDES
   # Exclude
   ${CMAKE_CURRENT_SOURCE_DIR}/PrecompiledHeaders
   ${ELUNA_EXCLUDE_DIRS})
-  
+
 # Provide an interface target for the game project to allow
 # dependent projects to build meanwhile.
 add_library(game-interface INTERFACE)
@@ -98,4 +100,30 @@ endif()
 # Generate precompiled header
 if(USE_COREPCH)
   add_cxx_pch(game ${PRIVATE_PCH_HEADER})
+endif()
+
+if(ELUNA)
+  if(WIN32)
+    if (MSVC)
+      add_custom_command(TARGET game
+        POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/bin/$(ConfigurationName)/lua_scripts/extensions/
+        COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/LuaEngine/extensions ${CMAKE_BINARY_DIR}/bin/$(ConfigurationName)/lua_scripts/extensions/
+      )
+    elseif(MINGW)
+      add_custom_command(TARGET game
+        POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/bin/lua_scripts/extensions/
+        COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/LuaEngine/extensions ${CMAKE_BINARY_DIR}/bin/lua_scripts/extensions/
+      )
+    endif()
+  endif()
+
+  if(UNIX)
+    install(DIRECTORY LuaEngine/extensions DESTINATION bin/lua_scripts/)
+  elseif(WIN32)
+    install(DIRECTORY LuaEngine/extensions DESTINATION "${CMAKE_INSTALL_PREFIX}/lua_scripts/")
+  endif()
+
+  add_subdirectory(LuaEngine)
 endif()
