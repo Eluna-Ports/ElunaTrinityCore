@@ -38,6 +38,9 @@
 #include <unordered_map>
 #include <vector>
 
+#ifdef ELUNA
+class Eluna;
+#endif
 class Player;
 class WorldPacket;
 class WorldSession;
@@ -786,6 +789,10 @@ class TC_GAME_API World
         void SetForcedWarModeFactionBalanceState(TeamId team, int32 reward = 0);
         void DisableForcedWarModeFactionBalanceState();
 
+#ifdef ELUNA
+        Eluna* GetEluna() const { return eluna; }
+        Eluna* eluna;
+#endif
     protected:
         void _UpdateGameTime();
 
