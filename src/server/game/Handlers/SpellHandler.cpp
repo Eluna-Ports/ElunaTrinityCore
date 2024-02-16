@@ -42,6 +42,9 @@
 #include "TemporarySummon.h"
 #include "TotemPackets.h"
 #include "World.h"
+#ifdef ELUNA
+#include "LuaEngine.h"
+#endif
 
 void WorldSession::HandleUseItemOpcode(WorldPackets::Spells::UseItem& packet)
 {
@@ -218,6 +221,11 @@ void WorldSession::HandleGameobjectReportUse(WorldPackets::GameObject::GameObjRe
 
     if (GameObject* go = GetPlayer()->GetGameObjectIfCanInteractWith(packet.Guid))
     {
+#ifdef ELUNA
+        if (Eluna* e = GetPlayer()->GetEluna())
+            if (e->OnGameObjectUse(_player, go))
+                return;
+#endif
         if (go->AI()->OnReportUse(_player))
             return;
 

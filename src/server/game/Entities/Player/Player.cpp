@@ -142,6 +142,9 @@
 #include <boost/dynamic_bitset.hpp>
 #include <G3D/g3dmath.h>
 #include <sstream>
+#ifdef ELUNA
+#include "LuaEngine.h"
+#endif
 
 // corpse reclaim times
 #define DEATH_EXPIRE_STEP (5*MINUTE)
@@ -4457,6 +4460,10 @@ void Player::ResurrectPlayer(float restore_percent, bool applySickness)
     // recast lost by death auras of any items held in the inventory
     CastAllObtainSpells();
 
+#ifdef ELUNA
+    if (Eluna* e = GetEluna())
+        e->OnResurrect(this);
+#endif
     if (!applySickness)
         return;
 
@@ -11387,6 +11394,15 @@ InventoryResult Player::CanUseItem(ItemTemplate const* proto, bool skipRequiredL
         if (ChrSpecialization(artifact->ChrSpecializationID) != GetPrimarySpecialization())
             return EQUIP_ERR_CANT_USE_ITEM;
 
+#ifdef ELUNA
+    if (Eluna* e = GetEluna())
+    {
+        InventoryResult eres = e->OnCanUseItem(this, proto->BasicData->ID);
+        if (eres != EQUIP_ERR_OK)
+            return eres;
+    }
+#endif
+
     return EQUIP_ERR_OK;
 }
 
@@ -11752,6 +11768,13 @@ Item* Player::EquipItem(uint16 pos, Item* pItem, bool update)
 
         ApplyEquipCooldown(pItem2);
 
+#ifdef ELUNA
+        if (Eluna* e = GetEluna())
+        {
+            e->OnEquip(this, pItem2, bag, slot); // This should be removed in the future
+            e->OnItemEquip(this, pItem2, slot);
+        }
+#endif
         return pItem2;
     }
 
@@ -11764,6 +11787,13 @@ Item* Player::EquipItem(uint16 pos, Item* pItem, bool update)
 
     UpdateAverageItemLevelEquipped();
 
+#ifdef ELUNA
+    if (Eluna* e = GetEluna())
+    {
+        e->OnEquip(this, pItem, bag, slot); // This should be removed in the future
+        e->OnItemEquip(this, pItem, slot);
+    }
+#endif
     return pItem;
 }
 
@@ -14698,6 +14728,10 @@ void Player::AddQuestAndCheckCompletion(Quest const* quest, Object* questGiver)
     {
         case TYPEID_UNIT:
             PlayerTalkClass->ClearMenus();
+#ifndef ELUNA
+            if (Eluna* e = GetEluna())
+                e->OnQuestAccept(this, questGiver->ToCreature(), quest);
+#endif
             questGiver->ToCreature()->AI()->OnQuestAccept(this, quest);
             break;
         case TYPEID_ITEM:
@@ -14732,6 +14766,10 @@ void Player::AddQuestAndCheckCompletion(Quest const* quest, Object* questGiver)
         }
         case TYPEID_GAMEOBJECT:
             PlayerTalkClass->ClearMenus();
+#ifdef ELUNA
+            if (Eluna* e = GetEluna())
+                e->OnQuestAccept(this, questGiver->ToGameObject(), quest);
+#endif
             questGiver->ToGameObject()->AI()->OnQuestAccept(this, quest);
             break;
         default:
@@ -16151,6 +16189,10 @@ QuestGiverStatus Player::GetQuestDialogStatus(Object const* questgiver) const
     {
         case TYPEID_GAMEOBJECT:
         {
+#ifndef ELUNA
+            if (Eluna* e = GetEluna())
+                e->GetDialogStatus(this, questgiver->ToGameObject());
+#endif
             if (GameObjectAI* ai = questgiver->ToGameObject()->AI())
                 if (Optional<QuestGiverStatus> questStatus = ai->GetDialogStatus(this))
                     return *questStatus;
@@ -16160,6 +16202,10 @@ QuestGiverStatus Player::GetQuestDialogStatus(Object const* questgiver) const
         }
         case TYPEID_UNIT:
         {
+#ifndef ELUNA
+            if (Eluna* e = GetEluna())
+                e->GetDialogStatus(this, questgiver->ToCreature());
+#endif
             Creature const* questGiverCreature = questgiver->ToCreature();
             if (!questGiverCreature->IsInteractionAllowedWhileHostile() && questGiverCreature->IsHostileTo(this))
                 return QuestGiverStatus::None;
@@ -26859,6 +26905,11 @@ void Player::StoreLootItem(ObjectGuid lootWorldObjectGuid, uint8 lootSlot, Loot*
             else
                 ApplyItemLootedSpell(sObjectMgr->GetItemTemplate(item->itemid));
 
+#ifdef ELUNA
+            if (Eluna* e = GetEluna())
+                e->OnLootItem(this, newitem, item->count, this->GetLootGUID());
+#endif
+
             break;
         }
         case LootItemType::Currency:
@@ -27287,6 +27338,10 @@ TalentLearnResult Player::LearnTalent(uint32 talentId, int32* spellOnCooldown)
 
     TC_LOG_DEBUG("misc", "Player::LearnTalent: TalentID: {} Spell: {} Group: {}\n", talentId, spellid, GetActiveTalentGroup());
 
+#ifdef ELUNA
+    if (Eluna* e = GetEluna())
+        e->OnLearnTalents(this, talentId, 0, spellid);
+#endif
     return TALENT_LEARN_OK;
 }
 
