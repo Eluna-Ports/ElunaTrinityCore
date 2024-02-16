@@ -35,6 +35,9 @@
 #include "WorldPacket.h"
 #include "WorldSession.h"
 #include <zlib.h>
+#ifdef ELUNA
+#include "LuaEngine.h"
+#endif
 
 #pragma pack(push, 1)
 

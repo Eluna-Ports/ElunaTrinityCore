@@ -68,6 +68,12 @@ target_link_libraries(common
     jemalloc
     openssl_ed25519
     short_alloc)
+	
+if (ELUNA)
+  target_link_libraries(common
+    PUBLIC
+      lualib)
+endif()
 
 add_dependencies(common revision_data.h)
 
