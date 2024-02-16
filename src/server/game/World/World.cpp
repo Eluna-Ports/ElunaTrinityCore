@@ -108,6 +108,12 @@
 #include "WorldStateMgr.h"
 #include <zlib.h>
 
+#ifdef ELUNA
+#include "LuaEngine.h"
+#include "ElunaLoader.h"
+#include "ElunaConfig.h"
+#endif
+
 TC_GAME_API std::atomic<bool> World::m_stopEvent(false);
 TC_GAME_API uint8 World::m_ExitCode = SHUTDOWN_EXIT_CODE;
 
@@ -1271,6 +1277,24 @@ bool World::SetInitialWorldSettings()
         return false;
     }
 
+#ifdef ELUNA
+    ///- Initialize Lua Engine
+    TC_LOG_INFO("server.loading", "Loading Eluna config...");
+    sElunaConfig->Initialize();
+
+    ///- Initialize Lua Engine
+    if (sElunaConfig->IsElunaEnabled())
+    {
+        TC_LOG_INFO("server.loading", "Loading Lua scripts...");
+        sElunaLoader->LoadScripts();
+
+        if (sElunaConfig->GetConfig(CONFIG_ELUNA_SCRIPT_RELOADER))
+        {
+            TC_LOG_INFO("server.loading", "Loading Eluna script reloader...");
+            sElunaLoader->InitializeFileWatcher();
+        }
+    }
+#endif
     ///- Initialize pool manager
     sPoolMgr->Initialize();
 
@@ -1916,6 +1940,14 @@ bool World::SetInitialWorldSettings()
     TC_LOG_INFO("server.loading", "Loading creature StaticFlags overrides...");
     sObjectMgr->LoadCreatureStaticFlagsOverride(); // must be after LoadCreatures
 
+#ifdef ELUNA
+    if (sElunaConfig->IsElunaEnabled())
+    {
+        TC_LOG_INFO("server.loading", "Starting Eluna world state...");
+        eluna = new Eluna(nullptr, sElunaConfig->IsElunaCompatibilityMode());
+    }
+#endif
+
     TC_LOG_INFO("server.loading", "Initializing Scripts...");
     sScriptMgr->Initialize();
     sScriptMgr->OnConfigLoad(false);                                // must be done after the ScriptMgr has been properly initialized
@@ -2074,6 +2106,11 @@ bool World::SetInitialWorldSettings()
 
     TC_LOG_INFO("server.loading", "Loading phase names...");
     sObjectMgr->LoadPhaseNames();
+
+#ifdef ELUNA
+    if (GetEluna())
+        GetEluna()->OnConfigLoad(false); // Must be done after Eluna is initialized and scripts have run.
+#endif
 
     uint32 startupDuration = GetMSTimeDiffToNow(startupBegin);
 

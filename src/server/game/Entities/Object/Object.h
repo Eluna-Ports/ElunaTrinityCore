@@ -37,6 +37,9 @@
 #include "WowCSEntityDefinitions.h"
 #include <list>
 #include <unordered_map>
+#ifdef ELUNA
+#include "LuaValue.h"
+#endif
 
 class AreaTrigger;
 class Conversation;
@@ -44,6 +47,10 @@ class Corpse;
 class Creature;
 class CreatureAI;
 class DynamicObject;
+#ifdef ELUNA
+class ElunaEventProcessor;
+class Eluna;
+#endif
 class GameObject;
 class InstanceScript;
 class Item;
@@ -896,6 +903,14 @@ class TC_GAME_API WorldObject : public Object, public WorldLocation
         bool IsStoredInWorldObjectGridContainer() const;
 
         uint32  LastUsedScriptID;
+
+#ifdef ELUNA
+        ElunaEventProcessor* elunaEvents;
+
+        Eluna* GetEluna() const;
+
+        LuaVal lua_data = LuaVal({});
+#endif
 
         // Transports
         TransportBase* GetTransport() const { return m_transport; }

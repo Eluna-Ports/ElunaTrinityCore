@@ -48,6 +48,9 @@
 #include "Util.h"
 #include "WorldStateMgr.h"
 #include <cstdarg>
+#ifdef ELUNA
+#include "LuaEngine.h"
+#endif
 
 template<class Do>
 void Battleground::BroadcastWorker(Do& _do)
@@ -115,6 +118,12 @@ Battleground::Battleground(Battleground const&) = default;
 
 Battleground::~Battleground()
 {
+#ifdef ELUNA
+    if (m_Map)
+        if (Eluna* e = m_Map->GetEluna())
+            e->OnBGDestroy(this, GetTypeID(), GetInstanceID());
+#endif
+
     // unload map
     if (m_Map)
     {
@@ -379,6 +388,11 @@ inline void Battleground::_ProcessJoin(uint32 diff)
         m_Events |= BG_STARTING_EVENT_4;
 
         GetBgMap()->GetBattlegroundScript()->OnStart();
+
+#ifdef ELUNA
+        if (Eluna* e = GetBgMap()->GetEluna())
+            e->OnBGStart(this, GetTypeID(), GetInstanceID());
+#endif
 
         if (StartMessageIds[BG_STARTING_EVENT_FOURTH])
             SendBroadcastText(StartMessageIds[BG_STARTING_EVENT_FOURTH], CHAT_MSG_BG_SYSTEM_NEUTRAL);
@@ -774,6 +788,11 @@ void Battleground::EndBattleground(Team winner)
 
         GetBgMap()->GetBattlegroundScript()->OnEnd(winner);
     }
+#ifdef ELUNA
+    //the type of the winner,change Team to BattlegroundTeamId,it could be better.
+    if (Eluna* e = GetBgMap()->GetEluna())
+        e->OnBGEnd(this, GetTypeID(), GetInstanceID(), Team(winner));
+#endif
 }
 
 uint32 Battleground::GetScriptId() const
