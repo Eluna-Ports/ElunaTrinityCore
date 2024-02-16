@@ -44,11 +44,17 @@
 #include <memory>
 #include <set>
 #include <unordered_set>
+#ifdef ELUNA
+#include "LuaValue.h"
+#endif
 
 class Battleground;
 class BattlegroundMap;
 class BattlegroundScript;
 class CreatureGroup;
+#ifdef ELUNA
+class Eluna;
+#endif
 class GameObjectModel;
 class Group;
 class InstanceLock;
@@ -755,6 +761,11 @@ class TC_GAME_API Map : public GridRefManager<NGridType>
         void InitSpawnGroupState();
         void UpdateSpawnGroupConditions();
 
+#ifdef ELUNA
+        Eluna* GetEluna() const;
+
+        LuaVal lua_data = LuaVal({});
+#endif
     private:
         // Type specific code for add/remove to/from grid
         template<class T>
@@ -840,6 +851,10 @@ class TC_GAME_API Map : public GridRefManager<NGridType>
         std::unordered_set<Object*> _updateObjects;
 
         MPSCQueue<FarSpellCallback> _farSpellCallbacks;
+
+#ifdef ELUNA
+        Eluna* eluna;
+#endif
 
         /*********************************************************/
         /***                   Phasing                         ***/
