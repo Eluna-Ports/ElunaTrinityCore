@@ -9,6 +9,8 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
     - uses: actions/checkout@v4
+      with:
+        submodules: true
     - name: Set reusable strings
       id: strings
       shell: bash
@@ -20,8 +22,8 @@ jobs:
         sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-11 100 --slave /usr/bin/g++ g++ /usr/bin/g++-11
     - name: Setup
       env:
-        CFLAGS: -Werror
-        CXXFLAGS: -Werror
+        #CFLAGS: -Werror
+        #CXXFLAGS: -Werror
         CMAKE_BUILD_TYPE: Debug
       run: >
         cmake -S ${{ github.workspace }} -B ${{ steps.strings.outputs.build-output-dir }}

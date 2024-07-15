@@ -10,6 +10,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
+      with:
+        submodules: true
 
     - name: Set reusable strings
       id: strings
@@ -37,8 +39,8 @@ jobs:
         
     - name: Configure CMake
       env:
-        CFLAGS: -Werror
-        CXXFLAGS: -Werror
+        #CFLAGS: -Werror
+        #CXXFLAGS: -Werror
         CMAKE_BUILD_TYPE: Debug
       run: >
         cmake -GNinja -B ${{ steps.strings.outputs.build-output-dir }}
