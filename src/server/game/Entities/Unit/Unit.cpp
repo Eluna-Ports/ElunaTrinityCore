@@ -427,7 +427,11 @@ Unit::~Unit()
 void Unit::Update(uint32 p_time)
 {
 #ifdef ELUNA
-    elunaEvents->Update(p_time);
+    if (elunaMapEvents) // can be null on maps without eluna
+        elunaMapEvents->Update(p_time);
+
+        if (elunaWorldEvents) // can be null on maps without eluna
+            elunaWorldEvents->Update(p_time);
 #endif
     // WARNING! Order of execution here is important, do not change.
     // Spells must be processed with event system BEFORE they go to _UpdateSpells.
