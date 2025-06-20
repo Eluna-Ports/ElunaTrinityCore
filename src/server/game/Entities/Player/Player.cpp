@@ -7584,6 +7584,13 @@ void Player::UpdateArea(uint32 newArea)
     {
         UpdateCriteria(CriteriaType::EnterArea, newArea);
         UpdateCriteria(CriteriaType::LeaveArea, oldArea);
+
+#ifdef ELUNA
+        // We only want the hook to trigger when the old and new area is actually different
+        if (Eluna* e = GetEluna())
+            if (oldArea != newArea)
+                e->OnUpdateArea(this, oldArea, newArea);
+#endif
     }
 }
 
