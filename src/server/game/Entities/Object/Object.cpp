@@ -930,9 +930,6 @@ void MovementInfo::OutDebug()
 }
 
 WorldObject::WorldObject(bool isWorldObject) : Object(), WorldLocation(), LastUsedScriptID(0),
-#ifdef ELUNA
-elunaEvents(nullptr),
-#endif
 m_movementInfo(), m_name(), m_isActive(false), m_isFarVisible(false), m_isStoredInWorldObjectGridContainer(isWorldObject), m_zoneScript(nullptr),
 m_transport(nullptr), m_zoneId(0), m_areaId(0), m_staticFloorZ(VMAP_INVALID_HEIGHT), m_outdoors(false), m_liquidStatus(LIQUID_MAP_NO_WATER),
 m_currMap(nullptr), m_InstanceId(0), _dbPhase(0), m_notifyflags(0), _heartbeatTimer(HEARTBEAT_INTERVAL)
@@ -943,11 +940,6 @@ m_currMap(nullptr), m_InstanceId(0), _dbPhase(0), m_notifyflags(0), _heartbeatTi
 
 WorldObject::~WorldObject()
 {
-#ifdef ELUNA
-    delete elunaEvents;
-    elunaEvents = NULL;
-#endif
-
     // this may happen because there are many !create/delete
     if (IsStoredInWorldObjectGridContainer() && m_currMap)
     {
@@ -1886,19 +1878,24 @@ void WorldObject::SetMap(Map* map)
     m_mapId = map->GetId();
     m_InstanceId = map->GetInstanceId();
 #ifdef ELUNA
-    //@todo: possibly look into cleanly clearing all pending events from previous map's event mgr.
-
-    // if multistate, delete elunaEvents and set to nullptr. events shouldn't move across states.
-    // in single state, the timed events should move across maps
+    // in multistate mode, always reset Map events, then recreate the Map events procesor
     if (!sElunaConfig->IsElunaCompatibilityMode())
     {
-        delete elunaEvents;
-        elunaEvents = nullptr; // set to null in case map doesn't use eluna
+        auto& events = GetElunaEvents(m_mapId);
+        if (events)
+            events.reset();
+
+        if (Eluna* e = map->GetEluna())
+            events = std::make_unique<ElunaEventProcessor>(e, this);
     }
 
-    if (Eluna* e = map->GetEluna())
-        if (!elunaEvents)
-            elunaEvents = new ElunaEventProcessor(e, this);
+    // create the World events processor
+    if (Eluna* e = sWorld->GetEluna())
+    {
+        auto& events = GetElunaEvents(-1);
+        if (!events)
+            events = std::make_unique<ElunaEventProcessor>(e, this);
+    }
 #endif
     if (IsStoredInWorldObjectGridContainer())
         m_currMap->AddWorldObject(this);
