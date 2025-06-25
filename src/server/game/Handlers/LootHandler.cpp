@@ -477,7 +477,8 @@ void WorldSession::HandleLootMasterGiveOpcode(WorldPackets::Loot::MasterLootItem
         }
 
         // now move item from loot to target inventory
-        if (Item* newitem = target->StoreNewItem(dest, item.itemid, true, item.randomBonusListId, item.GetAllowedLooters(), item.context, &item.BonusListIDs))
+        Item* newitem = target->StoreNewItem(dest, item.itemid, true, item.randomBonusListId, item.GetAllowedLooters(), item.context, &item.BonusListIDs);
+        if (newitem)
             aeResult.Add(newitem, item.count, loot->loot_type, loot->GetDungeonEncounterId());
         else
             target->ApplyItemLootedSpell(sObjectMgr->GetItemTemplate(item.itemid));
@@ -485,7 +486,6 @@ void WorldSession::HandleLootMasterGiveOpcode(WorldPackets::Loot::MasterLootItem
 #ifdef ELUNA
         if (Eluna* e = target->GetEluna())
         {
-            Item* newitem = target->StoreNewItem(dest, item.itemid, true, item.randomBonusListId, item.GetAllowedLooters(), item.context, &item.BonusListIDs);
             e->OnLootItem(target, newitem, item.count, req.Object);
         }
 #endif
