@@ -1280,6 +1280,7 @@ enum Language
     LANG_NERUBIAN             = 307,
     LANG_TONGUES_OF_SANCTUARY = 308,
     LANG_HARANI               = 309,
+    LANG_MAX_LANGUAGE         = 310,
 };
 
 enum TeamId

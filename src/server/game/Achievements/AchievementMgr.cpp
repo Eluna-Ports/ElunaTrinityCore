@@ -496,6 +496,11 @@ void PlayerAchievementMgr::CompletedAchievement(AchievementEntry const* achievem
 
     sScriptMgr->OnAchievementCompleted(referencePlayer, achievement);
 
+#ifdef ELUNA
+    if (Eluna* e = referencePlayer->GetEluna())
+        e->OnAchievementComplete(referencePlayer, achievement->ID);
+#endif
+
     // reward items and titles if any
     AchievementReward const* reward = sAchievementMgr->GetAchievementReward(achievement);
 
