@@ -38,6 +38,9 @@
 #include "Player.h"
 #include "UpdateData.h"
 #include "WorldSession.h"
+#ifdef ELUNA
+#include "LuaEngine.h"
+#endif
 
 Seconds Group::CountdownInfo::GetTimeLeft() const
 {
@@ -204,6 +207,11 @@ bool Group::Create(Player* leader)
     }
     else if (!AddMember(leader))
         return false;
+
+#ifdef ELUNA
+    if (Eluna* e = sWorld->GetEluna())
+        e->OnCreate(this, m_leaderGuid, m_groupFlags);
+#endif
 
     return true;
 }
