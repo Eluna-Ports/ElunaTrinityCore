@@ -803,8 +803,8 @@ class TC_GAME_API World
         }
 
 #ifdef ELUNA
-        Eluna* GetEluna() const { return eluna; }
-        Eluna* eluna;
+        Eluna* GetEluna() const { return eluna.get(); }
+        std::unique_ptr<Eluna> eluna;
 #endif
 
     protected:
