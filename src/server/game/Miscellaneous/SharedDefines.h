@@ -1276,6 +1276,7 @@ enum Language
     LANG_EARTHEN              = 304,
     LANG_NERUBIAN             = 307,
     LANG_TONGUES_OF_SANCTUARY = 308,
+    LANG_MAX_LANGUAGE         = 309,
 };
 
 enum TeamId

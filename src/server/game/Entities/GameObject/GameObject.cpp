@@ -1266,15 +1266,7 @@ void GameObject::Update(uint32 diff)
 {
 #ifdef ELUNA
     if (Eluna* e = GetEluna())
-    {
         e->UpdateAI(this, diff);
-
-        if (elunaMapEvents) // can be null on maps without eluna
-            elunaMapEvents->Update(diff);
-
-        if (elunaWorldEvents)
-            elunaWorldEvents->Update(diff);
-    }
 #endif
     WorldObject::Update(diff);
 
@@ -3786,11 +3778,11 @@ void GameObject::SetDestructibleState(GameObjectDestructibleState state, WorldOb
             break;
         case GO_DESTRUCTIBLE_DAMAGED:
         {
-            if (GetGOInfo()->destructibleBuilding.DamagedEvent && attackerOrHealer)
 #ifdef ELUNA
-                if (Eluna* e = GetEluna())
-                    e->OnDamaged(this, attackerOrHealer);
+            if (Eluna* e = GetEluna())
+                e->OnDamaged(this, attackerOrHealer);
 #endif
+            if (GetGOInfo()->destructibleBuilding.DamagedEvent && attackerOrHealer)
                 GameEvents::Trigger(GetGOInfo()->destructibleBuilding.DamagedEvent, attackerOrHealer, this);
             AI()->Damaged(attackerOrHealer, m_goInfo->destructibleBuilding.DamagedEvent);
 
