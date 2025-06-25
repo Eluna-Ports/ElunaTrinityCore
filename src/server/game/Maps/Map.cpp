@@ -97,11 +97,6 @@ struct RespawnInfoWithHandle : RespawnInfo
 
 Map::~Map()
 {
-#ifdef ELUNA
-    delete eluna;
-    eluna = nullptr;
-#endif
-
     // Delete all waiting spawns, else there will be a memory leak
     // This doesn't delete from database.
     UnloadAllRespawnInfos();
@@ -157,8 +152,9 @@ i_scriptLock(false), _respawnTimes(std::make_unique<RespawnListContainer>()), _r
     // lua state begins uninitialized
     eluna = nullptr;
 
-    if (sElunaConfig->IsElunaEnabled() && !sElunaConfig->IsElunaCompatibilityMode() && sElunaConfig->ShouldMapLoadEluna(id))
-        eluna = new Eluna(this);
+    if (sElunaConfig->IsElunaEnabled() && sElunaConfig->ShouldMapLoadEluna(id))
+        if (!Instanceable())
+            eluna = std::make_unique<Eluna>(this);
 #endif
 
     //lets initialize visibility distance for map
@@ -4153,13 +4149,3 @@ std::string InstanceMap::GetDebugInfo() const
 }
 
 template struct TC_GAME_API TypeListContainer<MapStoredObjectsUnorderedMap, Creature, GameObject, DynamicObject, Pet, Corpse, AreaTrigger, SceneObject, Conversation>;
-
-#ifdef ELUNA
-Eluna* Map::GetEluna() const
-{
-    if (sElunaConfig->IsElunaCompatibilityMode())
-        return sWorld->GetEluna();
-
-    return eluna;
-}
-#endif
