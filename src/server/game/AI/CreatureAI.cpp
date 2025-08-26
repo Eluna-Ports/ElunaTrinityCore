@@ -47,6 +47,11 @@ CreatureAI::CreatureAI(Creature* creature, uint32 scriptId) noexcept
       _negateBoundary(false), _scriptId(scriptId ? scriptId : creature->GetScriptId()), _isEngaged(false), _moveInLOSLocked(false)
 {
     ASSERT(_scriptId, "A CreatureAI was initialized with an invalid scriptId!");
+    if (!_scriptId)
+    {
+        TC_LOG_ERROR("scripts.ai", "A CreatureAI was initialized with an invalid scriptId {}!", _scriptId);
+        return;
+    }
 }
 
 CreatureAI::~CreatureAI()
