@@ -66,8 +66,6 @@ jobs:
         arch: x64
 
     - name: Configure CMake
-      env:
-        BOOST_ROOT: ${{ steps.install-boost.outputs.BOOST_ROOT }}
       run: >
         cmake -S ${{ github.workspace }} -B ${{ steps.strings.outputs.build-output-dir }}
         -DWITH_WARNINGS_AS_ERRORS=OFF -DTOOLS=ON
