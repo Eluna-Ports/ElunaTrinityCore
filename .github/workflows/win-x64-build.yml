@@ -58,7 +58,12 @@ jobs:
         & ${{ env.OPENSSL_ROOT_DIR }}/bin/openssl.exe version
 
     - name: Download and install Boost
-      run: choco install boost-msvc-14.3
+      id: install-boost
+      run: |
+        choco install boost-msvc-14.3
+        $searchPattern = "C:\local\boost*"
+        $foundFolders = Get-ChildItem -Path $searchPattern -Directory | Select-Object -ExpandProperty FullName
+        echo "boost_root=$foundFolders" >> $env:GITHUB_OUTPUT
 
     - name: Initialize Visual Studio Environment
       uses: egor-tensin/vs-shell@v2
@@ -66,6 +71,8 @@ jobs:
         arch: x64
 
     - name: Configure CMake
+      env:
+        BOOST_ROOT: ${{ steps.install-boost.outputs.boost_root }}
       run: >
         cmake -S ${{ github.workspace }} -B ${{ steps.strings.outputs.build-output-dir }}
         -DWITH_WARNINGS_AS_ERRORS=OFF -DTOOLS=ON
