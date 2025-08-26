@@ -676,6 +676,11 @@ uint32 Player::EnvironmentalDamage(EnviromentalDamage type, uint32 damage)
         }
 
         UpdateCriteria(CriteriaType::DieFromEnviromentalDamage, 1, type);
+
+#ifdef ELUNA
+        if (Eluna* e = GetEluna())
+            e->OnPlayerKilledByEnvironment(this, type);
+#endif
     }
 
     return final_damage;
@@ -3194,6 +3199,11 @@ void Player::LearnSpell(uint32 spell_id, bool dependent, int32 fromSkill /*= 0*/
             learnedSpellInfo.TraitDefinitionID = int32(trait->DefinitionId);
         learnedSpells.SuppressMessaging = suppressMessaging;
         SendDirectMessage(learnedSpells.Write());
+
+#ifdef ELUNA
+        if (Eluna* e = GetEluna())
+            e->OnLearnSpell(this, spell_id);
+#endif
     }
 
     // learn all disabled higher ranks and required spells (recursive)
@@ -5658,6 +5668,11 @@ bool Player::UpdateSkillPro(uint16 skillId, int32 chance, uint32 step)
         }
     }
 
+#ifdef ELUNA
+    if (Eluna* e = GetEluna())
+        e->OnSkillChange(this, skillId, new_value);
+#endif
+
     UpdateSkillEnchantments(skillId, value, new_value);
     UpdateCriteria(CriteriaType::SkillRaised, skillId);
     TC_LOG_DEBUG("entities.player.skills", "Player::UpdateSkillPro: Player '{}' ({}), SkillID: {}, Chance: {:3.1f}% taken",
@@ -6316,6 +6331,11 @@ void Player::CheckAreaExplore()
     if (offset >= m_activePlayerData->BitVectors->Values[PLAYER_DATA_FLAG_EXPLORED_ZONES_INDEX].Values.size()
         || !(m_activePlayerData->BitVectors->Values[PLAYER_DATA_FLAG_EXPLORED_ZONES_INDEX].Values[offset] & val))
     {
+#ifdef ELUNA
+        if (Eluna* e = GetEluna())
+            e->OnDiscoverArea(this, GetAreaId());
+#endif
+
         AddExploredZones(offset, val);
 
         UpdateCriteria(CriteriaType::RevealWorldMapOverlay, GetAreaId());
@@ -7573,7 +7593,6 @@ void Player::UpdateArea(uint32 newArea)
 #ifdef ELUNA
         // We only want the hook to trigger when the old and new area is actually different
         if (Eluna* e = GetEluna())
-            if (oldArea != newArea)
                 e->OnUpdateArea(this, oldArea, newArea);
 #endif
     }
@@ -11412,6 +11431,11 @@ Item* Player::StoreNewItem(ItemPosCountVec const& pos, uint32 itemId, bool updat
             CharacterDatabase.Execute(stmt);
         }
 
+#ifdef ELUNA
+        if (Eluna* e = GetEluna())
+            e->OnAdd(this, item);
+#endif
+
         if (addToCollection)
             GetSession()->GetCollectionMgr()->OnItemAdded(item);
 
@@ -11831,6 +11855,14 @@ void Player::QuickEquipItem(uint16 pos, Item* pItem)
 
         UpdateCriteria(CriteriaType::EquipItem, pItem->GetEntry());
         UpdateCriteria(CriteriaType::EquipItemInSlot, slot, pItem->GetEntry());
+
+#ifdef ELUNA
+        if (Eluna* e = GetEluna())
+        {
+            e->OnEquip(this, pItem, (pos >> 8), slot); // This should be removed in the future
+            e->OnItemEquip(this, pItem, slot);
+        }
+#endif
     }
 }
 
@@ -11943,6 +11975,10 @@ void Player::RemoveItem(uint8 bag, uint8 slot, bool update)
                         default:
                             break;
                     }
+#ifdef ELUNA
+                    if (Eluna* e = GetEluna())
+                        e->OnItemUnEquip(this, pItem, slot);
+#endif
                 }
             }
 
@@ -12088,6 +12124,11 @@ void Player::DestroyItem(uint8 bag, uint8 slot, bool update)
 
                 // equipment visual show
                 SetVisibleItemSlot(slot, nullptr);
+
+#ifdef ELUNA
+                if (Eluna* e = GetEluna())
+                    e->OnItemUnEquip(this, pItem, slot);
+#endif
             }
 
             m_items[slot] = nullptr;
@@ -14587,7 +14628,7 @@ void Player::AddQuestAndCheckCompletion(Quest const* quest, Object* questGiver)
     {
         case TYPEID_UNIT:
             PlayerTalkClass->ClearMenus();
-#ifndef ELUNA
+#ifdef ELUNA
             if (Eluna* e = GetEluna())
                 e->OnQuestAccept(this, questGiver->ToCreature(), quest);
 #endif
@@ -16039,7 +16080,7 @@ QuestGiverStatus Player::GetQuestDialogStatus(Object const* questgiver) const
     {
         case TYPEID_GAMEOBJECT:
         {
-#ifndef ELUNA
+#ifdef ELUNA
             if (Eluna* e = GetEluna())
                 e->GetDialogStatus(this, questgiver->ToGameObject());
 #endif
@@ -16052,7 +16093,7 @@ QuestGiverStatus Player::GetQuestDialogStatus(Object const* questgiver) const
         }
         case TYPEID_UNIT:
         {
-#ifndef ELUNA
+#ifdef ELUNA
             if (Eluna* e = GetEluna())
                 e->GetDialogStatus(this, questgiver->ToCreature());
 #endif
