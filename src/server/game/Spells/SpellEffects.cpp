@@ -584,8 +584,8 @@ void Spell::EffectDummy()
     {
         if (gameObjTarget)
             e->OnDummyEffect(m_caster, m_spellInfo->Id, effectInfo->EffectIndex, gameObjTarget);
-        //else if (unitTarget && unitTarget->GetTypeId() == TYPEID_UNIT)
-            //e->OnDummyEffect(m_caster, m_spellInfo->Id, effectInfo->EffectIndex, unitTarget->ToCreature());
+        else if (unitTarget && unitTarget->GetTypeId() == TYPEID_UNIT)
+            e->OnDummyEffect(m_caster, m_spellInfo->Id, effectInfo->EffectIndex, unitTarget->ToCreature());
         else if (itemTarget)
             e->OnDummyEffect(m_caster, m_spellInfo->Id, effectInfo->EffectIndex, itemTarget);
     }
