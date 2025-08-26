@@ -153,7 +153,8 @@ i_scriptLock(false), _respawnTimes(std::make_unique<RespawnListContainer>()), _r
     eluna = nullptr;
 
     if (sElunaConfig->IsElunaEnabled() && sElunaConfig->ShouldMapLoadEluna(id))
-        eluna = std::make_unique<Eluna>(this);
+        if (!Instanceable())
+            eluna = std::make_unique<Eluna>(this);
 #endif
 
     //lets initialize visibility distance for map
