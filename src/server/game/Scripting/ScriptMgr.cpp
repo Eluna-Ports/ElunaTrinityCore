@@ -1837,7 +1837,7 @@ CreatureAI* ScriptMgr::GetCreatureAI(Creature* creature)
 {
     ASSERT(creature);
 
-#ifndef ELUNA
+#ifdef ELUNA
     if (Eluna* e = creature->GetEluna())
         if (CreatureAI* luaAI = e->GetAI(creature))
             return luaAI;
@@ -1856,10 +1856,10 @@ GameObjectAI* ScriptMgr::GetGameObjectAI(GameObject* gameobject)
 {
     ASSERT(gameobject);
 
-
-/*#ifdef ELUNA
-    sEluna->OnSpawn(gameobject);
-#endif*/
+#ifdef ELUNA
+    if (Eluna* e = gameobject->GetEluna())
+        e->OnSpawn(gameobject);
+#endif
 
     GET_SCRIPT_RET(GameObjectScript, gameobject->GetScriptId(), tmpscript, nullptr);
     return tmpscript->GetAI(gameobject);
@@ -2431,6 +2431,14 @@ void ScriptMgr::OnGossipSelectCode(Player* player, uint32 menu_id, uint32 sender
 
 void ScriptMgr::OnQuestStatusChange(Player* player, uint32 questId)
 {
+#ifdef ELUNA
+    // we can potentially add more quest status hooks here later on
+    if (Eluna* e = player->GetEluna())
+    {
+        QuestStatus qStatus = player->GetQuestStatus(questId);
+        e->OnQuestStatusChanged(player, questId, qStatus);
+    }
+#endif
     FOREACH_SCRIPT(PlayerScript)->OnQuestStatusChange(player, questId);
 }
 
