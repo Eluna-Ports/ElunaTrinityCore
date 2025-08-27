@@ -2293,26 +2293,56 @@ void ScriptMgr::OnPlayerDuelEnd(Player* winner, Player* loser, DuelCompleteType 
 void ScriptMgr::OnPlayerChat(Player* player, uint32 type, uint32 lang, std::string& msg)
 {
     FOREACH_SCRIPT(PlayerScript)->OnChat(player, type, lang, msg);
+
+#ifdef ELUNA
+    if (Eluna* e = sWorld->GetEluna())
+        if (lang == LANG_ADDON)
+            e->OnAddonMessage(player, type, msg, NULL, NULL, NULL, NULL);
+#endif
 }
 
 void ScriptMgr::OnPlayerChat(Player* player, uint32 type, uint32 lang, std::string& msg, Player* receiver)
 {
     FOREACH_SCRIPT(PlayerScript)->OnChat(player, type, lang, msg, receiver);
+
+#ifdef ELUNA
+    if (Eluna* e = sWorld->GetEluna())
+        if (lang == LANG_ADDON)
+            e->OnAddonMessage(player, type, msg, receiver, NULL, NULL, NULL);
+#endif
 }
 
 void ScriptMgr::OnPlayerChat(Player* player, uint32 type, uint32 lang, std::string& msg, Group* group)
 {
     FOREACH_SCRIPT(PlayerScript)->OnChat(player, type, lang, msg, group);
+
+#ifdef ELUNA
+    if (Eluna* e = sWorld->GetEluna())
+        if (lang == LANG_ADDON)
+            e->OnAddonMessage(player, type, msg, NULL, NULL, group, NULL);
+#endif
 }
 
 void ScriptMgr::OnPlayerChat(Player* player, uint32 type, uint32 lang, std::string& msg, Guild* guild)
 {
     FOREACH_SCRIPT(PlayerScript)->OnChat(player, type, lang, msg, guild);
+
+#ifdef ELUNA
+    if (Eluna* e = sWorld->GetEluna())
+        if (lang == LANG_ADDON)
+            e->OnAddonMessage(player, type, msg, NULL, guild, NULL, NULL);
+#endif
 }
 
 void ScriptMgr::OnPlayerChat(Player* player, uint32 type, uint32 lang, std::string& msg, Channel* channel)
 {
     FOREACH_SCRIPT(PlayerScript)->OnChat(player, type, lang, msg, channel);
+
+#ifdef ELUNA
+    if (Eluna* e = sWorld->GetEluna())
+        if (lang == LANG_ADDON)
+            e->OnAddonMessage(player, type, msg, NULL, NULL, NULL, channel);
+#endif
 }
 
 void ScriptMgr::OnPlayerClearEmote(Player* player)
