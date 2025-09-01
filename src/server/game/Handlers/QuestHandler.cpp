@@ -377,7 +377,13 @@ void WorldSession::HandleQuestgiverChooseRewardOpcode(WorldPackets::Quest::Quest
         if (_player->CanRewardQuest(quest, packet.Choice.LootItemType, packet.Choice.Item.ItemID, true)) // Then check if player can receive the reward item (if inventory is not full, if player doesn't have too many unique items, and so on). If not, the client will close the gossip window
         {
 #ifdef ELUNA
-//            sEluna->OnQuestReward(_player, object, quest, packet.Choice.Item.ItemID);
+            if (Eluna* e = GetPlayer()->GetEluna())
+            {
+                if (object->ToCreature())
+                    e->OnQuestReward(_player, object->ToCreature(), quest, packet.Choice.Item.ItemID);
+                if (object->ToGameObject())
+                    e->OnQuestReward(_player, object->ToGameObject(), quest, packet.Choice.Item.ItemID);
+            }            
 #endif
             _player->RewardQuest(quest, packet.Choice.LootItemType, packet.Choice.Item.ItemID, object);
         }
