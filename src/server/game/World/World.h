@@ -30,6 +30,9 @@
 #include "Optional.h"
 #include "SharedDefines.h"
 #include "Timer.h"
+#ifdef ELUNA
+#include "ElunaMgr.h"
+#endif
 
 #include <atomic>
 #include <list>
@@ -803,8 +806,7 @@ class TC_GAME_API World
         }
 
 #ifdef ELUNA
-        Eluna* GetEluna() const { return eluna.get(); }
-        std::unique_ptr<Eluna> eluna;
+        Eluna* GetEluna() const { return sElunaMgr->Get(_elunaInfo); }
 #endif
 
     protected:
@@ -924,6 +926,9 @@ class TC_GAME_API World
         // War mode balancing
         void UpdateWarModeRewardValues();
 
+#ifdef ELUNA
+        ElunaInfo _elunaInfo;
+#endif
     friend class debug_commandscript;
 };
 
