@@ -7,9 +7,9 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
       with:
         submodules: 'recursive'
         fetch-depth: 0
@@ -28,15 +28,14 @@ jobs:
         echo "build-output-dir=${{ github.workspace }}/bin" >> "$GITHUB_OUTPUT"
     - name: Dependencies
       run: |
-        sudo apt-get update && sudo apt-get install -yq libboost-all-dev g++-11
-        sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-11 100 --slave /usr/bin/g++ g++ /usr/bin/g++-11
+        sudo apt-get update && sudo apt-get install -yq ccache libboost-dev libboost-filesystem-dev libboost-locale-dev libboost-program-options-dev libboost-regex-dev libboost-thread-dev libssl-dev libreadline-dev zlib1g-dev libbz2-dev
     - name: Setup
       env:
         CMAKE_BUILD_TYPE: Debug
       run: >
         cmake -S ${{ github.workspace }} -B ${{ steps.strings.outputs.build-output-dir }}
         -DWITH_WARNINGS=1 -DWITH_COREDEBUG=0 -DUSE_COREPCH=1 -DUSE_SCRIPTPCH=1 -DTOOLS=1 -DSCRIPTS=dynamic -DSERVERS=1 -DNOJEM=0
-        -DCMAKE_C_FLAGS_DEBUG="-DNDEBUG" -DCMAKE_CXX_FLAGS_DEBUG="-DNDEBUG"
+        -DCMAKE_C_FLAGS_DEBUG="-DNDEBUG -g0" -DCMAKE_CXX_FLAGS_DEBUG="-DNDEBUG -g0"
         -DCMAKE_INSTALL_PREFIX=check_install -DBUILD_TESTING=1
     - name: Build
       run: |
