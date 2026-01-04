@@ -19,10 +19,6 @@ jobs:
             cxx: clang++-17
             pch: 1
             launcher: 
-          - cc: clang-17
-            cxx: clang++-17
-            pch: 0
-            launcher: ccache
     steps:
     - uses: actions/checkout@v5
       with:
