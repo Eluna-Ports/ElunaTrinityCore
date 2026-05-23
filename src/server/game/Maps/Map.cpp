@@ -115,6 +115,11 @@ Map::~Map()
         sMapMgr->DecreaseScheduledScriptCount(m_scriptSchedule.size());
 
     m_terrain->UnloadMMapInstance(GetId(), GetInstanceId());
+
+#ifdef ELUNA
+    if (GetEluna())
+        sElunaMgr->Destroy(_elunaInfo);
+#endif
 }
 
 void Map::LoadAllCells()
