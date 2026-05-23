@@ -8813,6 +8813,10 @@ void Spell::CallScriptBeforeCastHandlers()
 
         script->_FinishScriptCall();
     }
+#ifdef ELUNA
+    if (Eluna* e = GetCaster()->GetEluna())
+        e->OnBeforeCast(this);
+#endif
 }
 
 void Spell::CallScriptOnCastHandlers()
@@ -8837,6 +8841,10 @@ void Spell::CallScriptAfterCastHandlers()
 
         script->_FinishScriptCall();
     }
+#ifdef ELUNA
+    if (Eluna* e = GetCaster()->GetEluna())
+        e->OnAfterCast(this);
+#endif
 }
 
 SpellCastResult Spell::CallScriptCheckCastHandlers()
@@ -8854,6 +8862,14 @@ SpellCastResult Spell::CallScriptCheckCastHandlers()
 
         script->_FinishScriptCall();
     }
+#ifdef ELUNA
+    SpellCastResult elunaResult = SPELL_CAST_OK;
+    if (Eluna* e = GetCaster()->GetEluna())
+        elunaResult = SpellCastResult(e->OnCheckCast(this));
+    if (elunaResult != SPELL_CAST_OK)
+        retVal = elunaResult;
+#endif
+
     return retVal;
 }
 
@@ -8911,6 +8927,29 @@ bool Spell::CallScriptEffectHandlers(SpellEffIndex effIndex, SpellEffectHandleMo
 
         script->_FinishScriptCall();
     }
+#ifdef ELUNA
+    if (Eluna* e = GetCaster()->GetEluna())
+    {
+        switch (mode)
+        {
+        case SPELL_EFFECT_HANDLE_LAUNCH:
+            preventDefault = e->OnEffectLaunch(this, effIndex, mode, preventDefault);
+            break;
+        case SPELL_EFFECT_HANDLE_LAUNCH_TARGET:
+            preventDefault = e->OnEffectLaunchTarget(this, effIndex, mode, preventDefault);
+            break;
+        case SPELL_EFFECT_HANDLE_HIT:
+            preventDefault = e->OnEffectHit(this, effIndex, mode, preventDefault);
+            break;
+        case SPELL_EFFECT_HANDLE_HIT_TARGET:
+            preventDefault = e->OnEffectHitTarget(this, effIndex, mode, preventDefault);
+            break;
+        default:
+            break;
+        }
+    }
+#endif
+
     return preventDefault;
 }
 
@@ -8937,6 +8976,10 @@ void Spell::CallScriptBeforeHitHandlers(SpellMissInfo missInfo)
 
         script->_FinishScriptCall();
     }
+#ifdef ELUNA
+    if (Eluna* e = GetCaster()->GetEluna())
+        e->OnBeforeSpellHit(this, missInfo);
+#endif
 }
 
 void Spell::CallScriptOnHitHandlers()
@@ -8949,6 +8992,10 @@ void Spell::CallScriptOnHitHandlers()
 
         script->_FinishScriptCall();
     }
+#ifdef ELUNA
+    if (Eluna* e = GetCaster()->GetEluna())
+        e->OnSpellHit(this);
+#endif
 }
 
 void Spell::CallScriptAfterHitHandlers()
@@ -8961,6 +9008,10 @@ void Spell::CallScriptAfterHitHandlers()
 
         script->_FinishScriptCall();
     }
+#ifdef ELUNA
+    if (Eluna* e = GetCaster()->GetEluna())
+        e->OnAfterSpellHit(this);
+#endif
 }
 
 void Spell::CallScriptCalcCritChanceHandlers(Unit const* victim, float& critChance)
@@ -9010,6 +9061,10 @@ void Spell::CallScriptObjectAreaTargetSelectHandlers(std::list<WorldObject*>& ta
 
         script->_FinishScriptCall();
     }
+#ifdef ELUNA
+    if (Eluna* e = GetCaster()->GetEluna())
+        e->OnObjectAreaTargetSelect(this, effIndex, targets);
+#endif
 }
 
 void Spell::CallScriptObjectTargetSelectHandlers(WorldObject*& target, SpellEffIndex effIndex, SpellImplicitTargetInfo const& targetType)
@@ -9023,6 +9078,10 @@ void Spell::CallScriptObjectTargetSelectHandlers(WorldObject*& target, SpellEffI
 
         script->_FinishScriptCall();
     }
+#ifdef ELUNA
+    if (Eluna* e = GetCaster()->GetEluna())
+        e->OnObjectTargetSelect(this, effIndex, target);
+#endif
 }
 
 void Spell::CallScriptDestinationTargetSelectHandlers(SpellDestination& target, SpellEffIndex effIndex, SpellImplicitTargetInfo const& targetType)
@@ -9036,6 +9095,10 @@ void Spell::CallScriptDestinationTargetSelectHandlers(SpellDestination& target, 
 
         script->_FinishScriptCall();
     }
+#ifdef ELUNA
+    if (Eluna* e = GetCaster()->GetEluna())
+        e->OnDestinationTargetSelect(this, effIndex, target);
+#endif
 }
 
 void Spell::CallScriptOnResistAbsorbCalculateHandlers(DamageInfo const& damageInfo, uint32& resistAmount, int32& absorbAmount)
@@ -9048,6 +9111,10 @@ void Spell::CallScriptOnResistAbsorbCalculateHandlers(DamageInfo const& damageIn
 
         script->_FinishScriptCall();
     }
+#ifdef ELUNA
+    if (Eluna* e = GetCaster()->GetEluna())
+        e->OnEffectCalcAbsorb(this, damageInfo, resistAmount, absorbAmount);
+#endif
 }
 
 void Spell::CallScriptEmpowerStageCompletedHandlers(int32 completedStagesCount)
